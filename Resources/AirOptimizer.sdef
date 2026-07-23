@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dictionary SYSTEM "file://localhost/System/Library/DTDs/sdef.dtd">
+<dictionary title="AirOptimizer Terminology">
+    <suite name="AirOptimizer Suite" code="AirO" description="Comandos de automação do AirOptimizer.">
+
+        <command name="quick boost" code="AIROqbst"
+                  description="Libera memória inativa do sistema (equivalente ao utilitário `purge` do macOS) sem encerrar nenhum processo.">
+            <cocoa class="AirOptimizerQuickBoostCommand"/>
+        </command>
+
+        <command name="system stats" code="AIROstat"
+                  description="Retorna um resumo em texto das estatísticas atuais do sistema: uso de CPU (%), uso de memória (%) e número de processos.">
+            <cocoa class="AirOptimizerSystemStatsCommand"/>
+            <result type="text" description="Ex.: &quot;CPU: 12% | Memória: 45% | Processos: 400&quot;."/>
+        </command>
+
+    </suite>
+</dictionary>
