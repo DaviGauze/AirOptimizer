@@ -3,4 +3,4 @@
 *.xcodeproj
 DerivedData/
 .DS_Store
-/AirOptimizer.app/
+/AirOptimizer*.app/
