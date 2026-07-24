@@ -31,9 +31,37 @@ automaticamente como um projeto SwiftPM.
 open AirOptimizer.app
 ```
 
-O script compila, monta `AirOptimizer.app` com `Info.plist`/`AirOptimizer.sdef`
-em `Resources/`, assina ad-hoc e registra no Launch Services. Use
-`./Scripts/build_app.sh release` para uma build de release.
+O script compila, monta `AirOptimizer.app` com `Info.plist`/`AirOptimizer.sdef`/
+`AppIcon.icns` em `Resources/`, assina ad-hoc, registra no Launch Services e
+reinicia o Dock (o cache de ícones do macOS costuma manter o ícone genérico
+antigo sem isso). Use `./Scripts/build_app.sh release` para uma build de
+release.
+
+### Trocando o ícone do app
+
+```bash
+swift Scripts/generate_icon.swift Resources/AppIcon-1024.png  # gera a arte (opcional, já existe uma)
+./Scripts/build_icns.sh                                        # PNG mestre → Resources/AppIcon.icns
+./Scripts/build_app.sh                                         # empacota com o novo ícone
+```
+
+`generate_icon.swift` desenha a arte atual (squircle azul flat, cor sólida —
+sem gradiente — com um raio branco ao centro, no estilo minimalista dos
+ícones utilitários da própria Apple) via AppKit/Core Graphics — edite esse
+script para mudar cor ou símbolo (qualquer SF Symbol serve), ou substitua
+`Resources/AppIcon-1024.png` por uma arte própria (1024×1024) e pule direto
+para `build_icns.sh`.
+
+### Comportamento "só na menu bar"
+
+Fechar a janela principal (botão vermelho ou Cmd+W) tira o ícone do Dock —
+o app continua rodando só no ícone da menu bar, sem encerrar (ver
+`AppDelegate.applicationShouldTerminateAfterLastWindowClosed` +
+`windowWillClose`). Para reabrir a janela sem o ícone do Dock, use "Abrir
+AirOptimizer" ou "Configurações" no menu do ícone da status bar — ambos
+voltam a política de ativação para `.regular` (`AirOptimizerApp.showMainWindow`)
+antes de reabrir a `WindowGroup`, senão o app fica preso como acessório e não
+ganha foco de verdade.
 
 ## Arquitetura
 
@@ -49,9 +77,13 @@ Sources/AirOptimizer/
 └── Views/               # DashboardView, ProcessDetailView, MenuBarView, SettingsPanelView, ResourceChartView
 Resources/
 ├── Info.plist           # copiado para o bundle pelo build_app.sh
-└── AirOptimizer.sdef    # dicionário de terminologia AppleScript
+├── AirOptimizer.sdef    # dicionário de terminologia AppleScript
+├── AppIcon-1024.png     # arte mestre do ícone (gerada por generate_icon.swift)
+└── AppIcon.icns         # gerado a partir do PNG mestre por build_icns.sh
 Scripts/
-└── build_app.sh         # empacota o executável em um .app de verdade
+├── build_app.sh         # empacota o executável em um .app de verdade
+├── generate_icon.swift  # desenha a arte do ícone (AppKit/Core Graphics)
+└── build_icns.sh        # PNG mestre → .iconset → .icns
 ```
 
 - **ProcessManager**: lista processos via `proc_listpids`/`proc_pidinfo`
@@ -102,18 +134,19 @@ tempo e corrompendo o baseline de %CPU um do outro.
   "Monitoramento"): intervalo de auto-refresh, limiar de alerta de memória,
   Performance Mode e agendador de limpeza — tudo ligado diretamente às
   ViewModels em uso (mudar um valor já tem efeito imediato).
-- **Menu bar**: mostra CPU/memória por processo (top consumidores) e só três
-  ações — Quick Boost, Configurações (abre a janela principal já na aba
-  Configurações) e Sair.
+- **Menu bar**: mostra CPU/memória por processo (top consumidores) e as ações
+  Quick Boost, Abrir AirOptimizer, Configurações (abre a janela principal já
+  na aba Configurações) e Sair — as duas primeiras reabrem a janela quando
+  ela estiver fechada (ver "Comportamento 'só na menu bar'" acima).
 - **Ícone da menu bar com CPU/RAM/Temperatura**: por padrão, o ícone da
-  status bar mostra `🖥CPU% | 💾RAM% | 🌡Temp°` lado a lado, atualizado junto
+  status bar mostra `CPU 24% | RAM 59% | 30°` lado a lado, atualizado junto
   com o polling. Pode ser desligado na aba "Configurações" → "Menu bar" (o
-  ícone volta a ser só o símbolo do app). Os ícones são emojis, não SF
-  Symbols — `MenuBarExtra` corta silenciosamente qualquer label composto por
-  múltiplos `Image`/`Text` (mesmo texto puro em várias linhas some após a
-  primeira), então tudo é concatenado em um único `Text`. Pelo mesmo motivo
-  de altura, não existe uma variante empilhada verticalmente — a altura do
-  item da status bar é travada na altura padrão da menu bar.
+  ícone volta a ser só o símbolo do app). É tudo texto puro (sem SF Symbols
+  nem emoji como ícone) porque `MenuBarExtra` corta silenciosamente qualquer
+  label composto por múltiplos `Image`/`Text` (mesmo texto puro em várias
+  linhas some após a primeira) — tudo é concatenado em um único `Text`. Pelo
+  mesmo motivo de altura, não existe uma variante empilhada verticalmente — a
+  altura do item da status bar é travada na altura padrão da menu bar.
 - **Gráficos de série temporal** (aba "Monitoramento"): CPU e memória do
   sistema ao longo do tempo, usando Swift Charts sobre o histórico já
   coletado por `SystemMonitorViewModel`.

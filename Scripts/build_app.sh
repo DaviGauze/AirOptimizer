@@ -32,12 +32,19 @@ mkdir -p "$APP_BUNDLE/Contents/MacOS" "$APP_BUNDLE/Contents/Resources"
 cp "$BINARY_PATH" "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
 cp "$ROOT_DIR/Resources/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
 cp "$ROOT_DIR/Resources/AirOptimizer.sdef" "$APP_BUNDLE/Contents/Resources/AirOptimizer.sdef"
+cp "$ROOT_DIR/Resources/AppIcon.icns" "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
 
 echo "==> Assinando ad-hoc (necessário para o Gatekeeper/Launch Services aceitar o bundle)"
 codesign --force --deep --sign - "$APP_BUNDLE"
 
 echo "==> Registrando no Launch Services"
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$APP_BUNDLE"
+
+# O cache de ícones do macOS (iconservicesd) é notoriamente teimoso: sem
+# "tocar" o bundle e reiniciar o Dock, o ícone genérico antigo às vezes
+# persiste mesmo depois de registrar de novo no Launch Services.
+touch "$APP_BUNDLE"
+killall Dock >/dev/null 2>&1 || true
 
 echo "==> Pronto: $APP_BUNDLE"
 echo "    Abrir:        open '$APP_BUNDLE'"

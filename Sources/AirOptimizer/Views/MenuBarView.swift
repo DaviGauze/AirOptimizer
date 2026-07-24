@@ -2,11 +2,13 @@ import SwiftUI
 import AppKit
 
 /// Conteúdo exibido no menu do ícone da status bar: uso de CPU/memória por
-/// processo (top consumidores) e só três ações — Quick Boost, Configurações
-/// e Sair — para manter o menu enxuto de usar sem abrir a janela principal.
+/// processo (top consumidores) e as ações — Quick Boost, Abrir AirOptimizer,
+/// Configurações e Sair — para usar sem depender do ícone do Dock, que some
+/// quando a janela principal é fechada (ver `AppDelegate`).
 struct MenuBarView: View {
     @ObservedObject var monitorVM: SystemMonitorViewModel
     @ObservedObject var processListVM: ProcessListViewModel
+    var onOpenWindow: () -> Void
     var onOpenSettings: () -> Void
 
     /// Quantos processos mostrar no resumo — o suficiente para identificar
@@ -54,6 +56,10 @@ struct MenuBarView: View {
 
             Button("Quick Boost") {
                 processListVM.runQuickBoost()
+            }
+
+            Button("Abrir AirOptimizer") {
+                onOpenWindow()
             }
 
             Button("Configurações") {

@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct AirOptimizerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @Environment(\.openWindow) private var openWindow
 
     /// Instância única de cada ViewModel, compartilhada entre a janela
     /// principal e o menu bar — evita dois pollers independentes chamando
@@ -18,7 +19,7 @@ struct AirOptimizerApp: App {
     }
 
     var body: some Scene {
-        WindowGroup("AirOptimizer") {
+        WindowGroup("AirOptimizer", id: "main") {
             DashboardView(
                 processListVM: processListVM,
                 monitorVM: monitorVM,
@@ -35,14 +36,24 @@ struct AirOptimizerApp: App {
             MenuBarView(
                 monitorVM: monitorVM,
                 processListVM: processListVM,
+                onOpenWindow: { showMainWindow() },
                 onOpenSettings: {
                     navigationState.selectedTab = .settings
-                    NSApp.activate(ignoringOtherApps: true)
+                    showMainWindow()
                 }
             )
         } label: {
             MenuBarIconLabel(monitorVM: monitorVM)
         }
         .menuBarExtraStyle(.window)
+    }
+
+    /// A janela some do Dock quando fechada (ver `AppDelegate`), então
+    /// reabri-la exige voltar a política de ativação para `.regular` antes —
+    /// sem isso o app fica preso como acessório e nunca ganha foco de verdade.
+    private func showMainWindow() {
+        NSApp.setActivationPolicy(.regular)
+        openWindow(id: "main")
+        NSApp.activate(ignoringOtherApps: true)
     }
 }
