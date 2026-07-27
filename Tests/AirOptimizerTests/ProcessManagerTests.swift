@@ -27,6 +27,27 @@ final class ProcessManagerTests: XCTestCase {
         let manager = ProcessManager()
         XCTAssertFalse(manager.processExists(pid: 999_999))
     }
+
+    /// Spawna um processo filho real (`/bin/sleep`) e confirma que
+    /// `terminate(signal: .sigkill)` realmente o mata — cobre o caminho
+    /// exercido pelo botão "Forçar Parada" da UI, e não só a validação de
+    /// processo crítico.
+    func testSigkillTerminatesRealProcess() throws {
+        let manager = ProcessManager()
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/bin/sleep")
+        task.arguments = ["30"]
+        try task.run()
+        let pid = task.processIdentifier
+
+        XCTAssertTrue(manager.processExists(pid: pid))
+
+        XCTAssertTrue(try manager.terminate(pid: pid, name: "sleep", signal: .sigkill))
+
+        task.waitUntilExit()
+        XCTAssertEqual(task.terminationReason, .uncaughtSignal)
+        XCTAssertFalse(manager.processExists(pid: pid))
+    }
 }
 
 final class CriticalProcessGuardTests: XCTestCase {

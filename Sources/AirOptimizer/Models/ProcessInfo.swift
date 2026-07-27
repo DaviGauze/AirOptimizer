@@ -36,6 +36,23 @@ enum TerminationSignal: String, CaseIterable, Identifiable {
         }
     }
 
+    /// Rótulo amigável exibido nos botões da UI — o nome técnico do sinal
+    /// POSIX (visível em `rawValue`) só aparece no diálogo de confirmação,
+    /// não no botão em si.
+    var actionLabel: String {
+        switch self {
+        case .sigterm: return "Fechar"
+        case .sigkill: return "Forçar Parada"
+        }
+    }
+
+    var actionIcon: String {
+        switch self {
+        case .sigterm: return "xmark.circle"
+        case .sigkill: return "bolt.slash.fill"
+        }
+    }
+
     var description: String {
         switch self {
         case .sigterm: return "Encerramento educado (permite que o app salve estado)"

@@ -35,11 +35,7 @@ struct ProcessDetailView: View {
             } else {
                 Section("Ações") {
                     ForEach(TerminationSignal.allCases) { signal in
-                        Button(role: .destructive) {
-                            confirmingSignal = signal
-                        } label: {
-                            Label("Encerrar com \(signal.rawValue)", systemImage: "xmark.octagon")
-                        }
+                        terminationButton(for: signal)
                     }
                 }
             }
@@ -54,7 +50,7 @@ struct ProcessDetailView: View {
             )
         ) {
             Button("Cancelar", role: .cancel) { confirmingSignal = nil }
-            Button("Encerrar", role: .destructive) {
+            Button(confirmingSignal?.actionLabel ?? "Encerrar", role: .destructive) {
                 if let signal = confirmingSignal {
                     onTerminate(signal)
                 }
@@ -62,6 +58,24 @@ struct ProcessDetailView: View {
             }
         } message: {
             Text("Tem certeza que deseja encerrar \"\(process.displayName)\" (PID \(process.pid))?")
+        }
+    }
+
+    /// Botão separado por sinal (em vez de um `.buttonStyle`/`.tint`
+    /// condicional inline) porque o type-checker do SwiftUI trava com
+    /// modificadores condicionais encadeados nesse ponto.
+    @ViewBuilder
+    private func terminationButton(for signal: TerminationSignal) -> some View {
+        let button = Button(role: .destructive) {
+            confirmingSignal = signal
+        } label: {
+            Label(signal.actionLabel, systemImage: signal.actionIcon)
+        }
+
+        if signal == .sigkill {
+            button.buttonStyle(.borderedProminent).tint(.red)
+        } else {
+            button.buttonStyle(.bordered)
         }
     }
 }

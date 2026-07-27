@@ -69,7 +69,7 @@ struct DashboardView: View {
             presenting: pendingTermination
         ) { pending in
             Button("Cancelar", role: .cancel) { pendingTermination = nil }
-            Button("Encerrar", role: .destructive) {
+            Button(pending.signal.actionLabel, role: .destructive) {
                 processListVM.terminate(pending.process, signal: pending.signal)
                 pendingTermination = nil
             }
@@ -217,19 +217,26 @@ struct DashboardView: View {
 
     @ViewBuilder
     private func actionButtons(for process: ProcessInfo) -> some View {
-        HStack {
-            Button("SIGTERM") {
+        HStack(spacing: 6) {
+            Button {
                 pendingTermination = (process, .sigterm)
+            } label: {
+                Label(TerminationSignal.sigterm.actionLabel, systemImage: TerminationSignal.sigterm.actionIcon)
             }
+            .buttonStyle(.bordered)
             .disabled(process.isCritical)
 
-            Button("SIGKILL") {
+            Button {
                 pendingTermination = (process, .sigkill)
+            } label: {
+                Label(TerminationSignal.sigkill.actionLabel, systemImage: TerminationSignal.sigkill.actionIcon)
             }
+            .buttonStyle(.borderedProminent)
+            .tint(.red)
             .disabled(process.isCritical)
-            .foregroundStyle(.red)
         }
-        .buttonStyle(.borderless)
+        .controlSize(.small)
         .font(.caption)
+        .labelStyle(.titleAndIcon)
     }
 }
