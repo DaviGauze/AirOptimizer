@@ -26,6 +26,14 @@ final class SMCReader {
 
     private let connection: io_connect_t?
 
+    /// Chaves que responderam com sucesso na última leitura, para pular a
+    /// varredura completa das ~9 chaves candidatas (até 18 chamadas IOKit)
+    /// em todo poll subsequente — o conjunto de chaves válidas para um Mac
+    /// não muda em tempo de execução. Reverte para a varredura completa se
+    /// as chaves cacheadas pararem de responder (defensivo; não esperado
+    /// na prática).
+    private var lastWorkingKeys: [String]?
+
     private init() {
         var conn: io_connect_t = 0
         let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSMC"))
@@ -49,13 +57,25 @@ final class SMCReader {
     func cpuTemperatureCelsius() -> Double? {
         guard connection != nil else { return nil }
 
-        let performanceReadings = Self.appleSiliconKeys.compactMap { readTemperature(key: $0) }
+        if let cachedKeys = lastWorkingKeys {
+            let readings = cachedKeys.compactMap { readTemperature(key: $0) }
+            if !readings.isEmpty {
+                return readings.reduce(0, +) / Double(readings.count)
+            }
+        }
+
+        let performanceReadings = Self.appleSiliconKeys.filter { readTemperature(key: $0) != nil }
         if !performanceReadings.isEmpty {
-            return performanceReadings.reduce(0, +) / Double(performanceReadings.count)
+            lastWorkingKeys = performanceReadings
+            let readings = performanceReadings.compactMap { readTemperature(key: $0) }
+            return readings.reduce(0, +) / Double(readings.count)
         }
 
         for key in Self.intelFallbackKeys {
-            if let value = readTemperature(key: key) { return value }
+            if let value = readTemperature(key: key) {
+                lastWorkingKeys = [key]
+                return value
+            }
         }
 
         return nil

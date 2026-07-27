@@ -74,8 +74,9 @@ struct DashboardView: View {
                 pendingTermination = nil
             }
         } message: { pending in
-            Text("PID \(pending.process.pid) · \(pending.process.path ?? "caminho desconhecido")\n" +
-                 "Sinal: \(pending.signal.rawValue) — \(pending.signal.description)")
+            let path = ProcessManager.shared.path(forPID: pending.process.pid) ?? "caminho desconhecido"
+            let signal = "\(pending.signal.rawValue) — \(pending.signal.description)"
+            Text("PID \(pending.process.pid) · \(path)\nSinal: \(signal)")
         }
         .alert(
             "Erro",

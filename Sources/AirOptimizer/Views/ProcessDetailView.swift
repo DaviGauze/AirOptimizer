@@ -18,7 +18,7 @@ struct ProcessDetailView: View {
                 }
                 LabeledContent("PID", value: "\(process.pid)")
                 LabeledContent("PID pai", value: "\(process.parentPID)")
-                LabeledContent("Caminho", value: process.path ?? "Desconhecido")
+                LabeledContent("Caminho", value: ProcessManager.shared.path(forPID: process.pid) ?? "Desconhecido")
             }
 
             Section("Recursos") {

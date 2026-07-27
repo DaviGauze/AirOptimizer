@@ -103,7 +103,7 @@ final class ProcessManager {
                 name: name,
                 displayName: app?.localizedName ?? name,
                 icon: app?.icon,
-                path: processPath(for: pid),
+                path: nil,
                 cpuUsage: cpu,
                 memoryBytes: raw.ptinfo.pti_resident_size,
                 state: ProcessState.from(bsdStatus: Int32(raw.pbsd.pbi_status)),
@@ -156,6 +156,14 @@ final class ProcessManager {
     /// sinal algum (`kill(pid, 0)` é a forma padrão de "ping" em POSIX).
     func processExists(pid: Int32) -> Bool {
         kill(pid, 0) == 0 || errno != ESRCH
+    }
+
+    /// Caminho completo do executável de um processo, buscado sob demanda
+    /// (não em `listProcesses()`) — é exibido só em diálogos de confirmação
+    /// e no painel de detalhes, então não vale o custo de uma syscall
+    /// `proc_pidpath` extra por processo em todo ciclo de polling.
+    func path(forPID pid: Int32) -> String? {
+        processPath(for: pid)
     }
 
     // MARK: - Prioridade (Performance Mode)

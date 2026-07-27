@@ -11,15 +11,7 @@ import Cocoa
 final class SystemStatsCommand: NSScriptCommand {
     override func performDefaultImplementation() -> Any? {
         MainActor.assumeIsolated {
-            if let stats = AppDelegate.monitorViewModel?.current {
-                return String(
-                    format: "CPU: %.0f%% | Memória: %.0f%% | Processos: %d",
-                    stats.totalCPUUsage,
-                    stats.memoryUsagePercentage,
-                    stats.processCount
-                )
-            }
-            let stats = SystemMonitor.shared.currentStats(
+            let stats = AppDelegate.monitorViewModel?.current ?? SystemMonitor.shared.currentStats(
                 processCount: AppDelegate.processListViewModel?.processes.count ?? ProcessManager.shared.listProcesses().count
             )
             return String(
