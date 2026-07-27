@@ -1,0 +1,88 @@
+/*
+  Localizable.strings (en)
+
+  Tradução em inglês da UI do AirOptimizer. As chaves são os literais em
+  português usados diretamente em `Text`/`Button`/`Label`/`Section`/etc no
+  SwiftUI (pt-BR é a tabela base — ver `Resources/pt-BR.lproj`).
+
+  Mensagens muito dinâmicas (interpoladas com PID, contagens, caminhos,
+  timestamps) não têm entrada aqui de propósito: o formato exato da chave
+  gerada pelo SwiftUI para interpolação (`%@`/`%ld`/`%d` conforme o tipo)
+  não é garantido de forma estável o suficiente para traduzir à mão sem o
+  `genstrings`/"Export Localizations" do Xcode, e uma chave levemente errada
+  falha silenciosamente (mostra pt-BR em vez de travar) — não vale o risco
+  para essas poucas strings. Ver "Idiomas" no README para a lista completa
+  do que permanece só em português.
+*/
+
+// MARK: - Ações gerais / diálogos
+
+"Cancelar" = "Cancel";
+"Erro" = "Error";
+"Fechar" = "Close";
+"Forçar Parada" = "Force Quit";
+"Encerrar" = "Terminate";
+"Confirmar encerramento" = "Confirm termination";
+
+// MARK: - Abas / navegação (DashboardTab)
+
+"Processos" = "Processes";
+"Monitoramento" = "Monitoring";
+"Configurações" = "Settings";
+
+// MARK: - Sidebar (DashboardView)
+
+"Ações rápidas" = "Quick actions";
+"Libera memória inativa do sistema sem encerrar nenhum app" = "Frees inactive system memory without closing any app";
+"Ordenar por" = "Sort by";
+"Crescente" = "Ascending";
+"Um processo zumbi já terminou, mas seu pai ainda não coletou o status de saída." = "A zombie process has already exited, but its parent hasn't collected its exit status yet.";
+
+// MARK: - Critério de ordenação (ProcessSortField)
+
+"Memória" = "Memory";
+"Nome" = "Name";
+
+// MARK: - Tabela de processos
+
+"PID" = "PID";
+"Status" = "Status";
+"Ações" = "Actions";
+"Buscar processo" = "Search process";
+"Temperatura" = "Temperature";
+
+// MARK: - Menu bar
+
+"Abrir AirOptimizer" = "Open AirOptimizer";
+"Sair" = "Quit";
+"Coletando estatísticas…" = "Collecting statistics…";
+
+// MARK: - Configurações
+
+"Intervalo de atualização" = "Refresh interval";
+"Alerta de memória" = "Memory alert";
+"Mostrar CPU/RAM/Temperatura na menu bar" = "Show CPU/RAM/Temperature in the menu bar";
+"Quando ativado, o ícone da menu bar mostra CPU | RAM | Temperatura lado a lado." = "When enabled, the menu bar icon shows CPU | RAM | Temperature side by side.";
+"Ativar Performance Mode" = "Enable Performance Mode";
+"Prioriza o app em primeiro plano e reduz a prioridade de apps ociosos em background." = "Prioritizes the foreground app and lowers the priority of idle background apps.";
+"Limpeza automática" = "Automatic cleanup";
+"Ativar agendador" = "Enable scheduler";
+"Sobre" = "About";
+"AirOptimizer — gerenciador de processos open source para macOS." = "AirOptimizer — open-source process manager for macOS.";
+
+// MARK: - Gráficos (ResourceChartView)
+
+"Uso de recursos ao longo do tempo" = "Resource usage over time";
+"Coletando amostras…" = "Collecting samples…";
+"Hora" = "Time";
+"Uso (%)" = "Usage (%)";
+"Métrica" = "Metric";
+
+// MARK: - Detalhe do processo (ProcessDetailView)
+
+"Identificação" = "Identification";
+"Executável" = "Executable";
+"PID pai" = "Parent PID";
+"Caminho" = "Path";
+"Recursos" = "Resources";
+"Estado" = "State";

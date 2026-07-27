@@ -50,7 +50,7 @@ struct ProcessDetailView: View {
             )
         ) {
             Button("Cancelar", role: .cancel) { confirmingSignal = nil }
-            Button(confirmingSignal?.actionLabel ?? "Encerrar", role: .destructive) {
+            Button(LocalizedStringKey(confirmingSignal?.actionLabel ?? "Encerrar"), role: .destructive) {
                 if let signal = confirmingSignal {
                     onTerminate(signal)
                 }
@@ -69,7 +69,7 @@ struct ProcessDetailView: View {
         let button = Button(role: .destructive) {
             confirmingSignal = signal
         } label: {
-            Label(signal.actionLabel, systemImage: signal.actionIcon)
+            Label(LocalizedStringKey(signal.actionLabel), systemImage: signal.actionIcon)
         }
 
         if signal == .sigkill {

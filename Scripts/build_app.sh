@@ -34,6 +34,20 @@ cp "$ROOT_DIR/Resources/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
 cp "$ROOT_DIR/Resources/AirOptimizer.sdef" "$APP_BUNDLE/Contents/Resources/AirOptimizer.sdef"
 cp "$ROOT_DIR/Resources/AppIcon.icns" "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
 
+# Ícones customizados (CPU/RAM/temperatura) usados na barra de resumo do
+# Dashboard — ver Utilities/BundledIcon.swift.
+mkdir -p "$APP_BUNDLE/Contents/Resources/Icons"
+cp "$ROOT_DIR/Resources/Icons"/*.png "$APP_BUNDLE/Contents/Resources/Icons/"
+
+# Copia toda pasta de localização (*.lproj) encontrada em Resources/ — assim,
+# adicionar um novo idioma (ex.: en.lproj) não exige mexer neste script.
+for lproj in "$ROOT_DIR"/Resources/*.lproj; do
+    [ -d "$lproj" ] || continue
+    name="$(basename "$lproj")"
+    mkdir -p "$APP_BUNDLE/Contents/Resources/$name"
+    cp "$lproj"/*.strings "$APP_BUNDLE/Contents/Resources/$name/" 2>/dev/null || true
+done
+
 echo "==> Assinando ad-hoc (necessário para o Gatekeeper/Launch Services aceitar o bundle)"
 codesign --force --deep --sign - "$APP_BUNDLE"
 

@@ -91,15 +91,22 @@ struct MenuBarView: View {
 ///   variação `\u{FE0E}` para forçar estilo monocromático) também não
 ///   renderizam nesse contexto — só texto puro funciona, daí os rótulos
 ///   "CPU"/"RAM" em vez de um glifo. Pelo mesmo motivo de altura (o item da
-///   status bar é travado na altura padrão da menu bar, confirmado até com 3
-///   linhas de texto puro) um layout empilhado verticalmente não é viável —
-///   daí só existir este modo horizontal.
+///   status bar é travado na altura padrão da menu bar) um layout empilhado
+///   verticalmente (rótulo em cima, valor embaixo) também não é viável —
+///   testado com `Text + Text` concatenados (que continuam sendo um único
+///   `Text`, então não esbarra no bug de filhos múltiplos acima) e fonte de
+///   7pt: a segunda linha ainda fica cortada pela metade, porque o
+///   `NSStatusItem` trava a altura do container em uma linha, não em duas
+///   linhas pequenas — confirmado por captura de tela real. Por isso o
+///   layout final é uma linha só, com os valores em negrito.
 struct MenuBarIconLabel: View {
     @ObservedObject var monitorVM: SystemMonitorViewModel
 
     var body: some View {
         if monitorVM.isMenuBarStatsEnabled {
-            Text("CPU \(cpuText) | RAM \(ramText) | \(tempText)")
+            (Text("CPU ") + Text(cpuText).bold()
+                + Text(" · RAM ") + Text(ramText).bold()
+                + Text(" · ") + Text(tempText).bold())
                 .monospacedDigit()
         } else {
             Image(systemName: "gauge.with.dots.needle.50percent")

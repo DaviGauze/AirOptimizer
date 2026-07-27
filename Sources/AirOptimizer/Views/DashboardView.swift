@@ -26,7 +26,7 @@ struct DashboardView: View {
 
                 Picker("", selection: $navigationState.selectedTab) {
                     ForEach(DashboardTab.allCases) { tab in
-                        Text(tab.rawValue).tag(tab)
+                        Text(LocalizedStringKey(tab.rawValue)).tag(tab)
                     }
                 }
                 .pickerStyle(.segmented)
@@ -69,7 +69,7 @@ struct DashboardView: View {
             presenting: pendingTermination
         ) { pending in
             Button("Cancelar", role: .cancel) { pendingTermination = nil }
-            Button(pending.signal.actionLabel, role: .destructive) {
+            Button(LocalizedStringKey(pending.signal.actionLabel), role: .destructive) {
                 processListVM.terminate(pending.process, signal: pending.signal)
                 pendingTermination = nil
             }
@@ -116,7 +116,7 @@ struct DashboardView: View {
             Section("Ordenar por") {
                 Picker("Ordenar por", selection: $processListVM.sortField) {
                     ForEach(ProcessSortField.allCases) { field in
-                        Text(field.rawValue).tag(field)
+                        Text(LocalizedStringKey(field.rawValue)).tag(field)
                     }
                 }
                 .pickerStyle(.inline)
@@ -139,14 +139,20 @@ struct DashboardView: View {
     }
 
     private var monitorSummary: some View {
-        HStack(spacing: 24) {
+        HStack(spacing: 20) {
             if let stats = monitorVM.current {
-                statTile(title: "CPU", value: String(format: "%.0f%%", stats.totalCPUUsage))
+                statTile(icon: "cpu", symbolFallback: "cpu", title: "CPU", value: String(format: "%.0f%%", stats.totalCPUUsage))
                 statTile(
+                    icon: "ram", symbolFallback: "memorychip",
                     title: "Memória",
-                    value: String(format: "%.1f / %.1f GB", stats.totalMemoryUsedGB, stats.totalMemoryGB)
+                    value: String(format: "%.0f%%", stats.memoryUsagePercentage)
                 )
-                statTile(title: "Processos", value: "\(stats.processCount)")
+                statTile(
+                    icon: "thermometer", symbolFallback: "thermometer",
+                    title: "Temperatura",
+                    value: stats.cpuTemperatureCelsius.map { String(format: "%.0f°", $0) } ?? "--°"
+                )
+                statTile(icon: nil, symbolFallback: "number", title: "Processos", value: "\(stats.processCount)")
             } else {
                 ProgressView().controlSize(.small)
             }
@@ -155,10 +161,29 @@ struct DashboardView: View {
         .padding()
     }
 
-    private func statTile(title: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(title).font(.caption).foregroundStyle(.secondary)
-            Text(value).font(.title3.monospacedDigit())
+    /// Ícone customizado (`Resources/Icons/`) à esquerda + rótulo em cima e
+    /// valor embaixo à direita — minimalista o bastante para caber 4 tiles
+    /// lado a lado na barra de resumo sem virar poluição visual.
+    private func statTile(icon: String?, symbolFallback: String, title: LocalizedStringKey, value: String) -> some View {
+        HStack(spacing: 8) {
+            Group {
+                if let icon, let nsImage = BundledIcon.image(named: icon) {
+                    Image(nsImage: nsImage)
+                        .resizable()
+                        .renderingMode(.template)
+                } else {
+                    Image(systemName: symbolFallback)
+                        .resizable()
+                }
+            }
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 18, height: 18)
+            .foregroundStyle(.secondary)
+
+            VStack(alignment: .leading, spacing: 0) {
+                Text(title).font(.caption2).foregroundStyle(.secondary)
+                Text(value).font(.title3.monospacedDigit())
+            }
         }
     }
 
@@ -221,7 +246,7 @@ struct DashboardView: View {
             Button {
                 pendingTermination = (process, .sigterm)
             } label: {
-                Label(TerminationSignal.sigterm.actionLabel, systemImage: TerminationSignal.sigterm.actionIcon)
+                Label(LocalizedStringKey(TerminationSignal.sigterm.actionLabel), systemImage: TerminationSignal.sigterm.actionIcon)
             }
             .buttonStyle(.bordered)
             .disabled(process.isCritical)
@@ -229,7 +254,7 @@ struct DashboardView: View {
             Button {
                 pendingTermination = (process, .sigkill)
             } label: {
-                Label(TerminationSignal.sigkill.actionLabel, systemImage: TerminationSignal.sigkill.actionIcon)
+                Label(LocalizedStringKey(TerminationSignal.sigkill.actionLabel), systemImage: TerminationSignal.sigkill.actionIcon)
             }
             .buttonStyle(.borderedProminent)
             .tint(.red)

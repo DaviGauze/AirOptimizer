@@ -1,0 +1,28 @@
+/*
+  Localizable.strings (pt-BR)
+
+  Tabela do idioma base do AirOptimizer. Os literais em português usados
+  diretamente em `Text`/`Button`/`Label` no SwiftUI já funcionam como chave
+  de busca em tabelas de localização (via `LocalizedStringKey`) — não
+  precisam de entrada aqui a menos que o texto exibido em pt-BR precise ser
+  diferente do literal usado no código-fonte (não é o caso hoje).
+
+  Este arquivo existe para declarar pt-BR como localização oficial do bundle
+  (ver `CFBundleLocalizations` em Info.plist) e documentar como adicionar um
+  novo idioma:
+
+  1. Crie `Resources/<código-do-idioma>.lproj/Localizable.strings`
+     (ex.: `en.lproj` para inglês) com entradas `"texto em pt-BR" = "tradução";`
+     para cada string visível na UI (veja Views/ e os `actionLabel`/
+     `description` em Models/ProcessInfo.swift).
+  2. Adicione o código do idioma ao array `CFBundleLocalizations` no
+     Info.plist.
+  3. `Scripts/build_app.sh` já copia qualquer `*.lproj` encontrado em
+     `Resources/` para o bundle automaticamente — nenhuma outra mudança de
+     build é necessária.
+
+  O macOS escolhe a tabela certa sozinho, comparando os idiomas preferidos
+  do usuário (Preferências do Sistema → Geral → Idioma e Região) com os
+  idiomas declarados em `CFBundleLocalizations`, caindo de volta para pt-BR
+  quando nenhum idioma do sistema tem tradução disponível.
+*/

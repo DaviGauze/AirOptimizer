@@ -177,6 +177,43 @@ tempo e corrompendo o baseline de %CPU um do outro.
 - O app não requer privilégios elevados; ações em processos de outros
   usuários falham com uma mensagem de erro clara em vez de travar.
 
+## Idiomas
+
+O app detecta e muda de idioma automaticamente com base nas preferências do
+usuário (Preferências do Sistema → Geral → Idioma e Região) — não existe
+seletor manual de idioma dentro do app; é o macOS quem escolhe, do mesmo
+jeito que faz para qualquer app nativo da Apple.
+
+- `Resources/Info.plist` declara `CFBundleDevelopmentRegion: pt-BR` e
+  `CFBundleLocalizations: [pt-BR, en]`.
+- `Resources/pt-BR.lproj/Localizable.strings` é a tabela base (os literais em
+  português no código-fonte já funcionam como chave, via `LocalizedStringKey`
+  do SwiftUI — esse arquivo só documenta o mecanismo).
+- `Resources/en.lproj/Localizable.strings` traduz os textos estáticos da UI
+  (botões, seções, toggles, abas, cabeçalhos de tabela, etc.).
+- `Scripts/build_app.sh` copia qualquer `*.lproj` de `Resources/` para o
+  bundle automaticamente — adicionar um novo idioma é só criar a pasta e
+  adicionar o código ao array acima, sem mexer no script.
+
+Para adicionar outro idioma: crie `Resources/<código>.lproj/Localizable.strings`
+com entradas `"texto em pt-BR" = "tradução";` para cada string visível (ver
+`Views/` e `actionLabel`/`description` em `Models/ProcessInfo.swift`) e some
+o código ao array `CFBundleLocalizations`.
+
+**Limitações conhecidas:**
+- Mensagens muito dinâmicas (com PID, contagens, caminhos ou timestamps
+  interpolados — ex.: o corpo dos diálogos de confirmação de encerramento)
+  permanecem em português mesmo com o sistema em inglês: o formato exato da
+  chave de interpolação que o SwiftUI gera (`%@`/`%ld`/`%d` conforme o tipo)
+  só é confiável de extrair com o "Export Localizations" do Xcode, então
+  preferi não adivinhar à mão — uma chave errada falha em silêncio (mostra
+  português em vez de travar), mas não vale o risco para essas poucas
+  strings.
+- Mensagens que não passam por `Text`/`Button`/`Label` (erros de
+  `LocalizedError`, entradas do log de ações, texto de notificações) ainda
+  não participam desse mecanismo — permanecem hardcoded em português até
+  serem migradas para `String(localized:)`.
+
 ## Status / limitações conhecidas
 
 - `swift test` requer Xcode completo instalado (XCTest não está disponível
@@ -200,10 +237,12 @@ open AirOptimizer.app
 ```
 
 1. **Dashboard / gerenciamento de processos**: na aba "Processos", busque um
-   app, clique em SIGTERM/SIGKILL num processo não-crítico e confirme no
-   diálogo. Tente encerrar `WindowServer` ou `Finder` — deve ser bloqueado
-   com uma mensagem explicativa. Note o ícone + nome amigável na coluna
-   "Nome" (o nome técnico só aparece como legenda quando diverge).
+   app e clique em "Fechar" (SIGTERM, botão neutro) ou "Forçar Parada"
+   (SIGKILL, botão vermelho preenchido) num processo não-crítico, e confirme
+   no diálogo — o nome técnico do sinal POSIX só aparece ali, não no botão.
+   Tente encerrar `WindowServer` ou `Finder` — deve ser bloqueado com uma
+   mensagem explicativa. Note o ícone + nome amigável na coluna "Nome" (o
+   nome técnico só aparece como legenda quando diverge).
 2. **Quick Boost**: abra alguns apps quaisquer (ex. TextEdit, Calculadora)
    sem trazê-los para frente:
    ```bash
